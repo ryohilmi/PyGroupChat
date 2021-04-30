@@ -13,14 +13,14 @@ def run_server():
   s.bind((host, port))
 
   clients = set()
-  recieved_packets = set()
+  receieved_packets = set()
 
-  recv_thread = threading.Thread(target=receieve_data, args=(s, recieved_packets))
+  recv_thread = threading.Thread(target=receieve_data, args=(s, receieved_packets))
   recv_thread.start()
 
   while True:
-    if len(recieved_packets) != 0:
-      data, address = recieved_packets.pop()
+    if len(receieved_packets) != 0:
+      data, address = receieved_packets.pop()
 
       clients.add(address)
 
