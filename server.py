@@ -1,11 +1,34 @@
-import socket
+import socket, threading
 
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.bind(("127.0.0.1", 2209))
+def receieve_data(sock, receieved_packets):
+  while True:
+    data, address = sock.recvfrom(1024)
+    receieved_packets.add((data, address))
 
-while True:
-  message, address = s.recvfrom(1024)
+def run_server():
+  host = "127.0.0.1"
+  port = 2209
 
-  print(f"Message : {message.decode('utf-8')} \nAddress: {address}")
+  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s.bind((host, port))
 
-  s.sendto(bytes("Connected to the server", "utf-8"), address)
+  clients = set()
+  recieved_packets = set()
+
+  recv_thread = threading.Thread(target=receieve_data, args=(s, recieved_packets))
+  recv_thread.start()
+
+  while True:
+    if len(recieved_packets) != 0:
+      data, address = recieved_packets.pop()
+
+      clients.add(address)
+
+      data = data.decode("utf-8")
+      print(data)
+
+      for client in clients:
+        if client != address:
+          s.sendto(data.encode("utf-8"), client)
+
+run_server()
